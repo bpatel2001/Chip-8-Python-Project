@@ -2,6 +2,7 @@ from chip8screen import Screen
 import pygame
 import time
 import random
+import threading
 
 class chip8:
     def __init__(self, path, setvxvy):
@@ -11,6 +12,8 @@ class chip8:
         self.v = [0] * 16
         self.PC = 0x200
         self.stack = []
+        self.delaytimer = 60
+        self.soundtimer = 60
         self.I = 0
         self.allocatefont()
         self.keypad = {1: 0x1, 2: 0x2, 3: 0x3, 4: 0xC,
@@ -23,53 +26,75 @@ class chip8:
         self.key = 0
         self.display = Screen()
 
-    # def keypressed(self):
-    #     key = pygame.key.get_pressed()
-    #     if key[pygame.K_1] == True:
-    #         return 0x1
-    #     elif key[pygame.K_2] == True:
-    #         return 0x2
-    #     elif key[pygame.K_3]== True:
-    #         return 0x3
-    #     elif key[pygame.K_4] == True:
-    #         return 0xC
-    #     elif key[pygame.K_q] == True:
-    #         return 0x4
-    #     elif key[pygame.K_w] == True:
-    #         return 0x5
-    #     elif key[pygame.K_e] == True:
-    #         return 0x6
-    #     elif key[pygame.K_r] == True:
-    #         return 0xD
-    #     elif key[pygame.K_a] == True:
-    #         return 0x7
-    #     elif key[pygame.K_s] == True:
-    #         return 0x8
-    #     elif key[pygame.K_d] == True:
-    #         return 0x9
-    #     elif key[pygame.K_f] == True:
-    #         return 0xE
-    #     elif key[pygame.K_z] == True:
-    #         return 0xA
-    #     elif key[pygame.K_x] == True:
-    #         return 0x0
-    #     elif key[pygame.K_c] == True:
-    #         return 0xB
-    #     elif key[pygame.K_v] == True:
-    #         return 0xF
-    #     else:
-    #         return 0
-        
-    def startgame(self):
+    def timers(self):
         while self.run:
-            self.loadrom()
-            #self.keypressed()
+            if self.delaytimer > 0:
+                self.delaytimer -=1
+            else:
+                self.delaytimer = 60
+            
+            if self.soundtimer > 0:
+                self.soundtimer -=1
+            else:
+                self.soundtimer = 60
+            time.sleep(1/60)
+        
+
+    def keypressed(self):
+        while self.run:
+            key = pygame.key.get_pressed()
+            if key[pygame.K_1] == True:
+                self.key = 0x1
+            elif key[pygame.K_2] == True:
+                self.key = 0x2
+            elif key[pygame.K_3]== True:
+                self.key = 0x3
+            elif key[pygame.K_4] == True:
+                self.key = 0xC
+            elif key[pygame.K_q] == True:
+                self.key = 0x4
+            elif key[pygame.K_w] == True:
+                self.key = 0x5
+            elif key[pygame.K_e] == True:
+                self.key = 0x6
+            elif key[pygame.K_r] == True:
+                self.key = 0xD
+            elif key[pygame.K_a] == True:
+                self.key = 0x7
+            elif key[pygame.K_s] == True:
+                self.key = 0x8
+            elif key[pygame.K_d] == True:
+                self.key = 0x9
+            elif key[pygame.K_f] == True:
+                self.key = 0xE
+            elif key[pygame.K_z] == True:
+                self.key = 0xA
+            elif key[pygame.K_x] == True:
+                self.key = 0x0
+            elif key[pygame.K_c] == True:
+                self.key = 0xB
+            elif key[pygame.K_v] == True:
+                self.key = 0xF
+            else:
+                self.key = 0
+            time.sleep(1/60)
+            
+    def startgame(self):
+        timer_thread = threading.Thread(target=self.timers)
+        timer_thread.daemon = True
+        timer_thread.start()
+
+        keypressed_thread = threading.Thread(target=self.keypressed)
+        keypressed_thread.daemon = True
+        keypressed_thread.start()
+
+        self.loadrom()
+        while self.run:
             self.executeopcode()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.run = False
             pygame.display.update()
-            time.sleep(1/500)
         pygame.quit()
     
     def allocatefont(self):
@@ -90,7 +115,7 @@ class chip8:
                 0xF0, 0x80, 0xF0, 0x80, 0xF0,
                 0xF0, 0x80, 0xF0, 0x80, 0x80]
         fontpos = 0
-        for i in range(0x50, 0x9F):
+        for i in range(0x50, 0xA0):
             self.memory[i] = font[fontpos]
             fontpos+=1
 
@@ -116,6 +141,7 @@ class chip8:
 
         #Clear display (00E0)
         if opcode == 0x00E0:
+            print("Running")
             for X in range(self.display.SCREEN_HEIGHT):
                 for Y in range(self.display.SCREEN_WIDTH):
                     self.display.pixel_array[Y,X] = (0,0,0)
@@ -258,10 +284,98 @@ class chip8:
             pos = n2 >> 8
             self.v[pos] = random.randint(0,255) & (n3 + n4)
 
+        #Skip if key 
         elif n1 == 0xE:
-            if n3 == 0x90:
-                key = pygame.key.get_pressed()
+            pos = n2 >> 8
 
+            #Skip if key is pressed (EX9E)
+            if n3 == 0x90:
+                if self.key == self.v[pos]:
+                    self.PC+=2
+                
+            #Skip if not pressed (EXA1)
+            elif n3 == 0xA0:
+                if not self.key == self.v[pos]:
+                    self.PC+=2
+        
+        elif n1 == 0xF000:
+            pos = n2 >> 8
+            fxnum = n3 + n4
+
+            if fxnum == 0x07:
+                self.v[pos] = self.delaytimer
+
+            elif fxnum == 0x15:
+                self.delaytimer = self.v[pos]
+
+            elif fxnum == 0x18:
+                self.soundtimer = self.v[pos]
+
+            elif fxnum == 0x1E:
+                self.I += self.v[pos]
+
+            elif fxnum == 0x0A:
+                print(self.key)
+                while not self.key > 0:
+                    self.PC -= 2
+                self.v[pos] = self.key
+            
+            elif fxnum == 0x29:
+                num = self.v[pos]
+
+                if num == 0x0:
+                    self.I = 0x50
+                elif num == 0x1:
+                    self.I = 0x55
+                elif num == 0x2:
+                    self.I = 0x5A
+                elif num == 0x3:
+                    self.I = 0x5F
+                elif num == 0x4:
+                    self.I = 0x64
+                elif num == 0x5:
+                    self.I = 0x69
+                elif num == 0x6:
+                    self.I = 0x6E
+                elif num == 0x7:
+                    self.I = 0x73
+                elif num == 0x8:
+                    self.I = 0x78
+                elif num == 0x9:
+                    self.I = 0x8D
+                elif num == 0xA:
+                    self.I = 0x82
+                elif num == 0xB:
+                    self.I = 0x87
+                elif num == 0xC:
+                    self.I = 0x8C
+                elif num == 0xD:
+                    self.I = 0x91
+                elif num == 0xE:
+                    self.I = 0x96
+                elif num == 0xF:
+                    self.I = 0x9B
+            elif fxnum == 0x33:
+                num = self.v[pos]
+                int1 = num % 10
+                num //= 10
+                int2 = num % 10
+                num //= 10
+                int3 = num
+
+                self.memory[self.I] = int1
+                self.memory[self.I + 1] = int2
+                self.memory[self.I + 2] = int3
+
+            elif fxnum == 0x55:
+                num = self.v[pos]
+                for x in range(num):
+                    self.memory[self.I + x] = self.v[x]
+
+            elif fxnum == 0x65:
+                num = self.v[pos]
+                for x in range(num):
+                    self.v[x] = self.memory[self.I + x]
 
         #Draw instruction (DXYN)
         elif n1 == 0xD000:
@@ -287,6 +401,8 @@ class chip8:
                 ycoordinate+=1
                 xcoordinate = x_access
             pygame.display.flip()
+        print(hex(opcode))
+        time.sleep(1/700)
 
 
 c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/test_opcode.ch8", False)
