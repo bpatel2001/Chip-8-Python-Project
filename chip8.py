@@ -357,24 +357,22 @@ class chip8:
                     self.I = 0x9B
             elif fxnum == 0x33:
                 num = self.v[pos]
-                int1 = num % 10
+                int3 = num % 10
                 num //= 10
                 int2 = num % 10
                 num //= 10
-                int3 = num
+                int1 = num
 
                 self.memory[self.I] = int1
                 self.memory[self.I + 1] = int2
                 self.memory[self.I + 2] = int3
 
             elif fxnum == 0x55:
-                num = self.v[pos]
-                for x in range(num):
+                for x in range(pos + 1):
                     self.memory[self.I + x] = self.v[x]
 
             elif fxnum == 0x65:
-                num = self.v[pos]
-                for x in range(num):
+                for x in range(pos + 1):
                     self.v[x] = self.memory[self.I + x]
 
         #Draw instruction (DXYN)
@@ -401,9 +399,7 @@ class chip8:
                 ycoordinate+=1
                 xcoordinate = x_access
             pygame.display.flip()
-        print(hex(opcode))
         time.sleep(1/700)
 
-
-c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/test_opcode.ch8", False)
+c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/4-flags.ch8", False)
 c8.startgame()
