@@ -23,7 +23,7 @@ class chip8:
                     }
 
         self.run = True
-        self.key = 0
+        self.key = -1
         self.display = Screen()
 
     def timers(self):
@@ -37,6 +37,7 @@ class chip8:
                 self.soundtimer -=1
             else:
                 self.soundtimer = 60
+            
             time.sleep(1/60)
         
 
@@ -76,7 +77,7 @@ class chip8:
             elif key[pygame.K_v] == True:
                 self.key = 0xF
             else:
-                self.key = 0
+                self.key = -1
             time.sleep(1/60)
             
     def startgame(self):
@@ -245,7 +246,7 @@ class chip8:
 
             #Subtract operation Y-X (8XY7)
             elif n4 == 7:
-                self.v[x_pos] = self.v[y_pos] - self.v[x_pos] & 0xFF
+                self.v[x_pos] = self.v[y_pos] - self.v[x_pos] & 0xFF 
 
                 if self.v[y_pos] > self.v[x_pos]:
                     self.v[0xF] = 1
@@ -285,9 +286,8 @@ class chip8:
             self.v[pos] = random.randint(0,255) & (n3 + n4)
 
         #Skip if key 
-        elif n1 == 0xE:
+        elif n1 == 0xE000:
             pos = n2 >> 8
-
             #Skip if key is pressed (EX9E)
             if n3 == 0x90:
                 if self.key == self.v[pos]:
@@ -316,7 +316,7 @@ class chip8:
 
             elif fxnum == 0x0A:
                 print(self.key)
-                while not self.key > 0:
+                while not self.key > -1:
                     self.PC -= 2
                 self.v[pos] = self.key
             
@@ -355,6 +355,7 @@ class chip8:
                     self.I = 0x96
                 elif num == 0xF:
                     self.I = 0x9B
+
             elif fxnum == 0x33:
                 num = self.v[pos]
                 int3 = num % 10
@@ -390,7 +391,7 @@ class chip8:
                     for X in range(8):
                             bit = (nthspritebyte >> (7 - X)) & 0x01
                             if xcoordinate < self.display.SCREEN_WIDTH:
-                                if self.display.pixel_array[xcoordinate,ycoordinate] == 1 and bit == 1:
+                                if self.display.pixel_array[xcoordinate,ycoordinate] > 0 and bit == 1:
                                     self.display.pixel_array[xcoordinate,ycoordinate] = (0,0,0)
                                     self.v[0xF] = 1
                                 elif self.display.pixel_array[xcoordinate,ycoordinate] == 0 and bit == 1:
@@ -399,7 +400,8 @@ class chip8:
                 ycoordinate+=1
                 xcoordinate = x_access
             pygame.display.flip()
-        time.sleep(1/700)
+    
+        time.sleep(1/500)
 
-c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/4-flags.ch8", False)
+c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/spaceinvaders.ch8", False)
 c8.startgame()
