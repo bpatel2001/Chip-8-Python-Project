@@ -12,33 +12,31 @@ class chip8:
         self.v = [0] * 16
         self.PC = 0x200
         self.stack = []
-        self.delaytimer = 60
-        self.soundtimer = 60
+        self.delaytimer = 0
+        self.soundtimer = 0
         self.I = 0
         self.allocatefont()
-        self.keypad = {1: 0x1, 2: 0x2, 3: 0x3, 4: 0xC,
-                       'q': 0x4, 'w': 0x5, 'e': 0x6, 'r': 0xD,
-                        'a': 0x7, 's': 0x8, 'd': 0x9, 'f': 0xE,
-                        'z': 0xA, 'x': 0x0, 'c': 0xB, 'v': 0xF,
-                    }
+        # self.keypad = {1: 0x1, 2: 0x2, 3: 0x3, 4: 0xC,
+        #                'q': 0x4, 'w': 0x5, 'e': 0x6, 'r': 0xD,
+        #                 'a': 0x7, 's': 0x8, 'd': 0x9, 'f': 0xE,
+        #                 'z': 0xA, 'x': 0x0, 'c': 0xB, 'v': 0xF,
+        #             }
 
         self.run = True
         self.key = -1
         self.display = Screen()
+        self.beep = pygame.mixer.Sound("E:/CHIP-8/Chip-8-Python-Project/beep-08b.wav")
 
     def timers(self):
         while self.run:
             if self.delaytimer > 0:
                 self.delaytimer -=1
-            else:
-                self.delaytimer = 60
             
             if self.soundtimer > 0:
                 self.soundtimer -=1
-            else:
-                self.soundtimer = 60
+                pygame.mixer.Sound.play(self.beep)
             
-            time.sleep(1/60)
+            time.sleep(1/120)
         
 
     def keypressed(self):
@@ -142,7 +140,6 @@ class chip8:
 
         #Clear display (00E0)
         if opcode == 0x00E0:
-            print("Running")
             for X in range(self.display.SCREEN_HEIGHT):
                 for Y in range(self.display.SCREEN_WIDTH):
                     self.display.pixel_array[Y,X] = (0,0,0)
@@ -239,7 +236,7 @@ class chip8:
             elif n4 == 5:
                 self.v[x_pos] = self.v[x_pos] - self.v[y_pos] & 0xFF
 
-                if self.v[x_pos] > self.v[y_pos]:
+                if self.v[x_pos] >= self.v[y_pos]:
                     self.v[0xF] = 1
                 else:
                     self.v[0xF] = 0
@@ -248,7 +245,7 @@ class chip8:
             elif n4 == 7:
                 self.v[x_pos] = self.v[y_pos] - self.v[x_pos] & 0xFF 
 
-                if self.v[y_pos] > self.v[x_pos]:
+                if self.v[y_pos] >= self.v[x_pos]:
                     self.v[0xF] = 1
                 else:
                     self.v[0xF] = 0
@@ -315,46 +312,30 @@ class chip8:
                 self.I += self.v[pos]
 
             elif fxnum == 0x0A:
-                print(self.key)
                 while not self.key > -1:
                     self.PC -= 2
                 self.v[pos] = self.key
             
             elif fxnum == 0x29:
                 num = self.v[pos]
-
-                if num == 0x0:
-                    self.I = 0x50
-                elif num == 0x1:
-                    self.I = 0x55
-                elif num == 0x2:
-                    self.I = 0x5A
-                elif num == 0x3:
-                    self.I = 0x5F
-                elif num == 0x4:
-                    self.I = 0x64
-                elif num == 0x5:
-                    self.I = 0x69
-                elif num == 0x6:
-                    self.I = 0x6E
-                elif num == 0x7:
-                    self.I = 0x73
-                elif num == 0x8:
-                    self.I = 0x78
-                elif num == 0x9:
-                    self.I = 0x8D
-                elif num == 0xA:
-                    self.I = 0x82
-                elif num == 0xB:
-                    self.I = 0x87
-                elif num == 0xC:
-                    self.I = 0x8C
-                elif num == 0xD:
-                    self.I = 0x91
-                elif num == 0xE:
-                    self.I = 0x96
-                elif num == 0xF:
-                    self.I = 0x9B
+                nummap = {0x0:0x50,
+                          0x1:0x55,
+                          0x2:0x5A,
+                          0x3:0x5F,
+                          0x4:0x64,
+                          0x5:0x69,
+                          0x6:0x6E,
+                          0x7:0x73,
+                          0x8:0x78,
+                          0x9:0x8D,
+                          0xA:0x82,
+                          0xB:0x87,
+                          0xC:0x8C,
+                          0xD:0x91,
+                          0xE:0x96,
+                          0xF:0x9B
+                        }
+                self.I = nummap[num]
 
             elif fxnum == 0x33:
                 num = self.v[pos]
@@ -400,8 +381,8 @@ class chip8:
                 ycoordinate+=1
                 xcoordinate = x_access
             pygame.display.flip()
-    
-        time.sleep(1/500)
+        print(self.v[0xF])
+        time.sleep(1/700)
 
-c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/spaceinvaders.ch8", False)
+c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/brix.ch8", False)
 c8.startgame()
