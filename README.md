@@ -1,4 +1,4 @@
-#Python Chip-8 Emulator
+## Python Chip-8 Emulator
 
 This is my project delving into interpreting and executing Chip-8 instructions, complete with input, sound and graphics handling using pygame.
 
