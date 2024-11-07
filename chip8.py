@@ -3,6 +3,7 @@ import pygame
 import time
 import random
 import threading
+import os
 
 class chip8:
     def __init__(self, path, setvxvy):
@@ -25,7 +26,9 @@ class chip8:
         self.run = True
         self.key = -1
         self.display = Screen()
-        self.beep = pygame.mixer.Sound("E:/CHIP-8/Chip-8-Python-Project/beep-08b.wav")
+
+        beeppath = os.path.join(os.getcwd(), "beep-08b.wav")
+        self.beep = pygame.mixer.Sound(beeppath)
 
     def timers(self):
         while self.run:
@@ -384,5 +387,6 @@ class chip8:
         print(self.v[0xF])
         time.sleep(1/700)
 
-c8 = chip8("E:/CHIP-8/Chip-8-Python-Project/roms/brix.ch8", False)
+rom_path = os.path.join(os.getcwd(), "roms", "brix.ch8")
+c8 = chip8(rom_path, False)
 c8.startgame()
