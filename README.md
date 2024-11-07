@@ -31,6 +31,12 @@ The original CHIP-8 keypad uses a 4x4 hexadecimal layout. Here is the mapping be
   Chip-8            Keyboard
 ```
 
+## Issues
+Currently unable to pass all of Timendus's quirk tests, which causes issues in some games. I plan to make more quirks be a toggle depending on the program.
+![image](https://github.com/user-attachments/assets/b2305222-7169-420a-afb7-5200a86f3614)
+
+
 ## Acknowledgements
 - [Tobias V. Langhoff's high level guide](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/)
 - [Cowgod's Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
+- [Timendus's Chip-8 Test Suite](https://github.com/Timendus/chip8-test-suite?tab=readme-ov-file#corax-opcode-test)
