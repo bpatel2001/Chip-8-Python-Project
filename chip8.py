@@ -228,29 +228,29 @@ class chip8:
 
             #Add operation (8XY4)
             elif n4 == 4:
-                self.v[x_pos] = self.v[x_pos] + self.v[y_pos] & 0xFF
-
                 if self.v[x_pos] + self.v[y_pos] > 0xFF:
+                    self.v[x_pos] = self.v[x_pos] + self.v[y_pos] & 0xFF
                     self.v[0xF] = 1
                 else:
+                    self.v[x_pos] = self.v[x_pos] + self.v[y_pos] & 0xFF
                     self.v[0xF] = 0
 
             #Subtract operation X-Y (8XY5)
             elif n4 == 5:
-                self.v[x_pos] = self.v[x_pos] - self.v[y_pos] & 0xFF
-
                 if self.v[x_pos] >= self.v[y_pos]:
+                    self.v[x_pos] = self.v[x_pos] - self.v[y_pos] & 0xFF
                     self.v[0xF] = 1
                 else:
+                    self.v[x_pos] = self.v[x_pos] - self.v[y_pos] & 0xFF
                     self.v[0xF] = 0
 
             #Subtract operation Y-X (8XY7)
             elif n4 == 7:
-                self.v[x_pos] = self.v[y_pos] - self.v[x_pos] & 0xFF 
-
                 if self.v[y_pos] >= self.v[x_pos]:
+                    self.v[x_pos] = self.v[y_pos] - self.v[x_pos] & 0xFF 
                     self.v[0xF] = 1
                 else:
+                    self.v[x_pos] = self.v[y_pos] - self.v[x_pos] & 0xFF 
                     self.v[0xF] = 0
 
             #Bitwise right shift operation (8XY6) 
@@ -258,18 +258,19 @@ class chip8:
                 if self.setvxvy == True:
                     self.v[x_pos] = self.v[y_pos]
 
-                self.v[0xF] = self.v[x_pos] & 1
-
+                shifted_value = self.v[x_pos] & 1
                 self.v[x_pos] = self.v[x_pos] >> 1 & 0xFF
+                self.v[0xF] = shifted_value
 
             #Bitwise left shift operation (8XYE)
             elif n4 == 0xE:
                 if self.setvxvy == True:
                     self.v[x_pos] = self.v[y_pos]
 
-                self.v[0xF] = (self.v[x_pos] >> 7) & 1
-                    
+
+                shifted_value = (self.v[x_pos] >> 7) & 1
                 self.v[x_pos] = self.v[x_pos] << 1 & 0xFF
+                self.v[0xF] = shifted_value
                 
         #Set index register I (ANNN)
         elif n1 == 0xA000:
@@ -384,9 +385,8 @@ class chip8:
                 ycoordinate+=1
                 xcoordinate = x_access
             pygame.display.flip()
-        print(self.v[0xF])
-        time.sleep(1/700)
+        time.sleep(1/1000)
 
-rom_path = os.path.join(os.getcwd(), "roms", "brix.ch8")
+rom_path = os.path.join(os.getcwd(), "roms", "danm8ku.ch8")
 c8 = chip8(rom_path, False)
 c8.startgame()
