@@ -23,13 +23,14 @@ This is my project delving into interpreting and executing Chip-8 instructions, 
 
 ## Key Mapping
 The original CHIP-8 keypad uses a 4x4 hexadecimal layout. Here is the mapping being emulated on a keyboard:
-   
+``` 
   1 2 3 C           1 2 3 4
   4 5 6 D           Q W E R
   7 8 9 E     ->    A S D F
   A 0 B F           Z X C V
   Chip-8            Keyboard
-  
+```
+
 ## Acknowledgements
 - [Tobias V. Langhoff's high level guide](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/)
 - [Cowgod's Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
