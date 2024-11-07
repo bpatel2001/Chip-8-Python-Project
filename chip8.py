@@ -39,7 +39,7 @@ class chip8:
                 self.soundtimer -=1
                 pygame.mixer.Sound.play(self.beep)
             
-            time.sleep(1/120)
+            time.sleep(1/60)
         
 
     def keypressed(self):
@@ -385,8 +385,8 @@ class chip8:
                 ycoordinate+=1
                 xcoordinate = x_access
             pygame.display.flip()
-        time.sleep(1/1000)
+        time.sleep(1/700)
 
-rom_path = os.path.join(os.getcwd(), "roms", "danm8ku.ch8")
+rom_path = os.path.join(os.getcwd(), "roms", "pong.rom")
 c8 = chip8(rom_path, False)
 c8.startgame()
