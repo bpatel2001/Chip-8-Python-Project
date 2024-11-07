@@ -3,6 +3,7 @@ import pygame
 import time
 import random
 import threading
+import os
 pygame.init()
 
 class chip8:
@@ -26,12 +27,9 @@ class chip8:
         self.run = True
         self.key = -1
         self.display = Screen()
-        try:
-            pygame.mixer.init()
-            self.beep = pygame.mixer.Sound("./beep-08b.wav")
-        except pygame.error:
-            print("Audio could not be initialized")
-            self.beep = None
+
+        beeppath = os.path.join(os.getcwd(), "beep-08b.wav")
+        self.beep = pygame.mixer.Sound(beeppath)
 
     def timers(self):
         while self.run:
@@ -389,5 +387,6 @@ class chip8:
             pygame.display.flip()
         time.sleep(1/700)
 
-c8 = chip8("./roms/tetris.rom", False)
+rom_path = os.path.join(os.getcwd(), "roms", "brix.ch8")
+c8 = chip8(rom_path, False)
 c8.startgame()
