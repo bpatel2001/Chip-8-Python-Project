@@ -22,6 +22,58 @@ class chip8:
         #                 'a': 0x7, 's': 0x8, 'd': 0x9, 'f': 0xE,
         #                 'z': 0xA, 'x': 0x0, 'c': 0xB, 'v': 0xF,
         #             }
+        self.n1_table = {
+            0x0000: self.n1_0_lookup,
+            0x1000: self.jump_to_NNN,
+            0x2000: self.jump_to_subroutine_NNN,
+            0x3000: self.skip_if_reg_equals_NN,
+            0x4000: self.skip_if_reg_not_equals_NN,
+            0x5000: self.skip_if_reg_equals_y,
+            0x6000: self.change_val_at_x,
+            0x7000: self.add_reg_at_x,
+            0x8000: self.n1_8_lookup,
+            0x9000: self.skip_if_reg_not_equals_y,
+            0xA000: self.set_I_NNN,
+            0xB000: self.jump_with_offset,
+            0xC000: self.gen_rand_num,
+            0xE000: self.n1_E_lookup,
+            0xF000: self.n1_F_lookup,
+            0xD000: self.draw
+        }
+
+        self.x0table = {
+            0x00E0: self.clear_display,
+            0x00EE: self.return_subroutine
+        }
+
+        self.x8table = {
+            0x0: self.set_operation,
+            0x1: self.binary_or_operation,
+            0x2: self.binary_and_operation,
+            0x3: self.binary_xor_operation,
+            0x4: self.add_operation,
+            0x5: self.subtract_operation,
+            0x6: self.right_shift_operation,
+            0x7: self.subtract_operation,
+            0xE: self.left_shift_operation
+        }
+
+        self.xEtable = {
+            0x90: self.skip_if_key_pressed,
+            0xA0: self.skip_if_key_not_pressed
+        }
+
+        self.xFtable = {
+            0x07: self.set_vx_to_delay_timer,
+            0x15: self.set_delay_timer_to_vx,
+            0x18: self.set_sound_timer_to_vx,
+            0x1E: self.add_to_index,
+            0x0A: self.get_key,
+            0x29: self.set_font_pos,
+            0x33: self.binary_decimal_conversion,
+            0x55: self.store_memory,
+            0x65: self.load_memory
+        }
 
         self.run = True
         self.key = -1
@@ -140,6 +192,45 @@ class chip8:
         n2 = opcode & 0xF00
         n3 = opcode & 0xF0
         n4 = opcode & 0xF
+
+        def n1_0_lookup(self):
+            x0table(opcode)
+        
+        def n1_8_lookup(self):
+            x8table(n4)
+        
+        def n1_E_lookup(self):
+            xEtable(n3)
+        
+        def n1_F_lookup(self):
+            xFtable(n3)
+
+
+        def clear_display(self):
+            for X in range(self.display.SCREEN_HEIGHT):
+                for Y in range(self.display.SCREEN_WIDTH):
+                    self.display.pixel_array[Y,X] = (0,0,0)
+            pygame.display.flip()
+        
+        def return_subroutine(self):
+            self.PC = self.stack.pop()
+        
+        def jump_to_NNN(self):
+            jump_pos = n2 + n3 + n4
+            self.PC = jump_pos
+
+        def jump_to_subroutine_NNN(self):
+            self.stack.append(self.PC)
+            jump_pos = n2 + n3 + n4
+            self.PC = jump_pos
+
+        def skip_if_reg_equals_NN(self):
+            value = n3 + n4
+            pos = n2 >> 8
+            if self.v[pos] == value:
+                self.PC += 2
+
+        n1_table[n1]()
 
         #Clear display (00E0)
         if opcode == 0x00E0:
