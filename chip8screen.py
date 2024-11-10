@@ -9,5 +9,5 @@ class Screen:
         self.pixel_array = pygame.PixelArray(self.screen)
 
 
-        pygame.init()
+        
 

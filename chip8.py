@@ -562,6 +562,6 @@ class chip8:
             xcoordinate = x_access
         pygame.display.flip()
 
-rom_path = os.path.join(os.getcwd(), "roms", "mysnake.ch8")
+rom_path = os.path.join(os.getcwd(), "roms", "Pong (1 player).ch8")
 c8 = chip8(rom_path, False)
 c8.startgame()
