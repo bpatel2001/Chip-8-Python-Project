@@ -1,7 +1,7 @@
 ## Python Chip-8 Emulator
 
 This is my project delving into interpreting and executing Chip-8 instructions, complete with input, sound and graphics handling using pygame.
-
+![]([https://github.com/bpatel2001/Chip-8-Python-Project/blob/main/chipgif.gif])
 ## Requirements
 - Python 3.x
 - pygame
