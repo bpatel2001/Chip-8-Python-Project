@@ -4,6 +4,7 @@ import time
 import random
 import threading
 import os
+pygame.init()
 
 class chip8:
     def __init__(self, path, setvxvy):
@@ -195,7 +196,7 @@ class chip8:
         else:
             exit
 
-        time.sleep(1/1000)
+        time.sleep(1/700)
 
     def n1_0_lookup(self):
         self.x0table[self.opcode]()
